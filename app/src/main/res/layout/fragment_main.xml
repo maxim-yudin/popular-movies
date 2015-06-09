@@ -1,0 +1,26 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <GridView
+        android:id="@+id/gvMovieList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:columnWidth="124dp"
+        android:gravity="center"
+        android:horizontalSpacing="0dp"
+        android:numColumns="auto_fit"
+        android:scrollbarStyle="outsideOverlay"
+        android:stretchMode="spacingWidthUniform"
+        android:verticalSpacing="0dp"
+        android:visibility="gone"
+        tools:context=".MainActivityFragment" />
+
+    <ProgressBar
+        android:id="@+id/pbLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="visible" />
+</FrameLayout>
