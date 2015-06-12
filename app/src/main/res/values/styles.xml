@@ -5,7 +5,4 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="SettingsTheme" parent="AppTheme">
-    </style>
-
 </resources>
