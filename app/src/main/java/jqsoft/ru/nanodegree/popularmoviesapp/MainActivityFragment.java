@@ -20,10 +20,6 @@ import android.widget.Toast;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,7 +96,7 @@ public class MainActivityFragment extends Fragment {
         return fragmentView;
     }
 
-    private class GetMovieListTask extends AsyncTask<String, Void, String> {
+    private class GetMovieListTask extends AsyncTask<String, Void, MovieListResult> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -108,47 +104,31 @@ public class MainActivityFragment extends Fragment {
             gvMovieList.setVisibility(View.GONE);
         }
 
-        protected String doInBackground(String... params) {
+        protected MovieListResult doInBackground(String... params) {
             try {
-                return ApiHelper.getMovieList(currentSortBy);
+                MovieDbApi movieDbApi = new MovieDbApi();
+                MovieDbService movieDbService = movieDbApi.getService();
+                return movieDbService.getMovieList(currentSortBy);
             } catch (Exception e) {
                 // if some erros occurs, e.g. no internet
                 return null;
             }
         }
 
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(MovieListResult result) {
             if (getActivity() == null) {
                 return;
             }
 
-            if (result == null) {
+            if (result == null || result.getMovieList() == null) {
                 Toast.makeText(getActivity(), R.string.some_error, Toast.LENGTH_SHORT).show();
+                pbLoading.setVisibility(View.GONE);
+                gvMovieList.setVisibility(View.VISIBLE);
                 return;
             }
 
-            try {
-                JSONObject movieListJson = new JSONObject(result);
-                JSONArray movieArray = movieListJson.getJSONArray("results");
-                movieList = new ArrayList<>(movieArray.length());
-                JSONObject movieRaw;
-                Movie movie;
-                for (int i = 0; i < movieArray.length(); i++) {
-                    movieRaw = movieArray.getJSONObject(i);
-                    movie = new Movie();
-                    movie.Id = movieRaw.getString("id");
-                    movie.OriginalTitle = movieRaw.getString("original_title");
-                    movie.Overview = movieRaw.getString("overview");
-                    movie.PosterPath = movieRaw.getString("poster_path");
-                    movie.BackdropPath = movieRaw.getString("backdrop_path");
-                    movie.VoteAverage = movieRaw.getString("vote_average");
-                    movie.ReleaseDate = movieRaw.getString("release_date");
-                    movieList.add(movie);
-                }
-                gvMovieList.setAdapter(new MovieAdapter(getActivity(), movieList));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            movieList = new ArrayList<>(result.getMovieList());
+            gvMovieList.setAdapter(new MovieAdapter(getActivity(), movieList));
 
             pbLoading.setVisibility(View.GONE);
             gvMovieList.setVisibility(View.VISIBLE);
@@ -190,7 +170,7 @@ public class MainActivityFragment extends Fragment {
                 posterHolder = (PosterHolder) convertView.getTag();
             }
 
-            Picasso.with(mContext).load(UrlBuilder.getPosterUrl(getItem(position).PosterPath)).into(posterHolder.ivPoster, new Callback() {
+            Picasso.with(mContext).load(getItem(position).getPosterUrl()).into(posterHolder.ivPoster, new Callback() {
                 @Override
                 public void onSuccess() {
                     posterHolder.pbPosterLoading.setVisibility(View.GONE);

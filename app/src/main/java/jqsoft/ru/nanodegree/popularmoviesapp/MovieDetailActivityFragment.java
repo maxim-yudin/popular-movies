@@ -56,7 +56,7 @@ public class MovieDetailActivityFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         Movie movie = getMovie();
-        Picasso.with(getActivity()).load(UrlBuilder.getBackdropUrl(movie.BackdropPath)).into(ivBackDrop, new Callback() {
+        Picasso.with(getActivity()).load(movie.getBackdropUrl()).into(ivBackDrop, new Callback() {
             @Override
             public void onSuccess() {
                 pbBackDropLoading.setVisibility(View.GONE);
@@ -68,7 +68,7 @@ public class MovieDetailActivityFragment extends Fragment {
                 pbBackDropLoading.setVisibility(View.GONE);
             }
         });
-        Picasso.with(getActivity()).load(UrlBuilder.getPosterUrl(movie.PosterPath)).into(ivPoster, new Callback() {
+        Picasso.with(getActivity()).load(movie.getPosterUrl()).into(ivPoster, new Callback() {
             @Override
             public void onSuccess() {
                 pbPosterLoading.setVisibility(View.GONE);
