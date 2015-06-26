@@ -26,14 +26,14 @@ public class MovieDetailActivityFragment extends Fragment {
         MovieDetailActivityFragment fragment = new MovieDetailActivityFragment();
 
         Bundle args = new Bundle();
-        args.putSerializable(Constants.MOVIE, movie);
+        args.putParcelable(Constants.MOVIE, movie);
         fragment.setArguments(args);
 
         return fragment;
     }
 
     private Movie getMovie() {
-        return (Movie) getArguments().getSerializable(Constants.MOVIE);
+        return (Movie) getArguments().getParcelable(Constants.MOVIE);
     }
 
     @Override

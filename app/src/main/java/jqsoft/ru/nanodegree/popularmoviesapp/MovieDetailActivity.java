@@ -16,7 +16,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             if (extras.containsKey(Constants.MOVIE)) {
                 if (savedInstanceState == null) {
                     MovieDetailActivityFragment movieDetailActivityFragment =
-                            MovieDetailActivityFragment.newInstance((Movie) extras.getSerializable(Constants.MOVIE));
+                            MovieDetailActivityFragment.newInstance((Movie) extras.getParcelable(Constants.MOVIE));
                     getSupportFragmentManager().beginTransaction().add(android.R.id.content, movieDetailActivityFragment).commit();
                 }
             }
