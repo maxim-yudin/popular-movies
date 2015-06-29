@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivityFragment extends Fragment {
+    public static final String MOVIE_LIST = "movieList";
+
     private SharedPreferences settings;
     private GridView gvMovieList;
     private ProgressBar pbLoading;
@@ -36,12 +38,6 @@ public class MainActivityFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-    }
-
-    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -50,17 +46,22 @@ public class MainActivityFragment extends Fragment {
         currentSortBy = settings.getString(getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_sort_order_popularity_desc_value));
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_LIST)) {
             getMovies();
         } else {
-            if (movieList != null) {
-                gvMovieList.setAdapter(new MovieAdapter(getActivity(), movieList));
-                pbLoading.setVisibility(View.GONE);
-                gvMovieList.setVisibility(View.VISIBLE);
-            } else {
-                getMovies();
-            }
+            movieList = savedInstanceState.getParcelableArrayList(MOVIE_LIST);
+            gvMovieList.setAdapter(new MovieAdapter(getActivity(), movieList));
+            pbLoading.setVisibility(View.GONE);
+            gvMovieList.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (movieList != null) {
+            outState.putParcelableArrayList(MOVIE_LIST, movieList);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     private void getMovies() {
