@@ -1,10 +1,13 @@
-package jqsoft.ru.nanodegree.popularmoviesapp;
+package jqsoft.ru.nanodegree.popularmoviesapp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import jqsoft.ru.nanodegree.popularmoviesapp.fragments.MainActivityFragment;
+import jqsoft.ru.nanodegree.popularmoviesapp.R;
 
 public class MainActivity extends AppCompatActivity {
     @Override

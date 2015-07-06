@@ -1,4 +1,4 @@
-package jqsoft.ru.nanodegree.popularmoviesapp;
+package jqsoft.ru.nanodegree.popularmoviesapp.activities;
 
 import android.content.res.Configuration;
 import android.os.Bundle;

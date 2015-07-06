@@ -1,4 +1,4 @@
-package jqsoft.ru.nanodegree.popularmoviesapp;
+package jqsoft.ru.nanodegree.popularmoviesapp.api;
 
 import retrofit.RestAdapter;
 

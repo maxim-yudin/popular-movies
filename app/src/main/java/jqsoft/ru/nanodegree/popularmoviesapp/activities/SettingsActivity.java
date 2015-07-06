@@ -1,9 +1,11 @@
-package jqsoft.ru.nanodegree.popularmoviesapp;
+package jqsoft.ru.nanodegree.popularmoviesapp.activities;
 
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
+
+import jqsoft.ru.nanodegree.popularmoviesapp.R;
 
 public class SettingsActivity extends AppCompatPreferenceActivity implements Preference.OnPreferenceChangeListener {
     @Override

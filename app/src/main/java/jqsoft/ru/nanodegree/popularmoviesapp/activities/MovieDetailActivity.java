@@ -1,7 +1,12 @@
-package jqsoft.ru.nanodegree.popularmoviesapp;
+package jqsoft.ru.nanodegree.popularmoviesapp.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
+import jqsoft.ru.nanodegree.popularmoviesapp.fragments.MovieDetailActivityFragment;
+import jqsoft.ru.nanodegree.popularmoviesapp.R;
+import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 
 
 public class MovieDetailActivity extends AppCompatActivity {

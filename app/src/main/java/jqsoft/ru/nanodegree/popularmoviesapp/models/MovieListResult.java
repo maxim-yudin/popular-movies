@@ -1,4 +1,4 @@
-package jqsoft.ru.nanodegree.popularmoviesapp;
+package jqsoft.ru.nanodegree.popularmoviesapp.models;
 
 import java.util.List;
 

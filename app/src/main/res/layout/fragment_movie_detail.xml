@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:scrollbarStyle="outsideOverlay"
-    tools:context="jqsoft.ru.nanodegree.popularmoviesapp.MovieDetailActivityFragment">
+    tools:context="jqsoft.ru.nanodegree.popularmoviesapp.fragments.MovieDetailActivityFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

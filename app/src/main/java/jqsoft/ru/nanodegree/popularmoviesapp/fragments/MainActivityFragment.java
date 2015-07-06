@@ -1,4 +1,4 @@
-package jqsoft.ru.nanodegree.popularmoviesapp;
+package jqsoft.ru.nanodegree.popularmoviesapp.fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +22,14 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
+import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbApi;
+import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbService;
+import jqsoft.ru.nanodegree.popularmoviesapp.R;
+import jqsoft.ru.nanodegree.popularmoviesapp.activities.MovieDetailActivity;
+import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
+import jqsoft.ru.nanodegree.popularmoviesapp.models.MovieListResult;
 
 public class MainActivityFragment extends Fragment {
     public static final String MOVIE_LIST = "movieList";
