@@ -23,11 +23,11 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
-import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbApi;
-import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbService;
 import jqsoft.ru.nanodegree.popularmoviesapp.R;
 import jqsoft.ru.nanodegree.popularmoviesapp.activities.MovieDetailActivity;
+import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbApi;
+import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbService;
+import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.MovieListResult;
 
@@ -105,7 +105,7 @@ public class MainActivityFragment extends Fragment {
         return fragmentView;
     }
 
-    private class GetMovieListTask extends AsyncTask<String, Void, MovieListResult> {
+    private class GetMovieListTask extends AsyncTask<Void, Void, MovieListResult> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -113,11 +113,16 @@ public class MainActivityFragment extends Fragment {
             gvMovieList.setVisibility(View.GONE);
         }
 
-        protected MovieListResult doInBackground(String... params) {
+        protected MovieListResult doInBackground(Void... params) {
             try {
-                MovieDbApi movieDbApi = new MovieDbApi();
-                MovieDbService movieDbService = movieDbApi.getService();
-                return movieDbService.getMovieList(currentSortBy);
+                if (!currentSortBy.equals(getString(R.string.pref_sort_order_favorites_value))) {
+                    MovieDbApi movieDbApi = new MovieDbApi();
+                    MovieDbService movieDbService = movieDbApi.getService();
+                    return movieDbService.getMovieList(currentSortBy);
+                } else {
+                    // here will be favorites list
+                    return null;
+                }
             } catch (Exception e) {
                 // if some erros occurs, e.g. no internet
                 return null;

@@ -13,7 +13,9 @@
 
     <string name="pref_sort_order_popularity_desc">Most popular</string>
     <string name="pref_sort_order_highest_rated">Highest rated</string>
+    <string name="pref_sort_order_favorites">Favorites</string>
 
     <string name="pref_sort_order_popularity_desc_value" translatable="false">popularity.desc</string>
     <string name="pref_sort_order_highest_rated_value" translatable="false">vote_average.desc</string>
+    <string name="pref_sort_order_favorites_value" translatable="false">favorites</string>
 </resources>
