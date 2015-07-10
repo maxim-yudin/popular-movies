@@ -73,7 +73,7 @@
                         android:id="@+id/tvOriginalTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"
+                        android:layout_marginBottom="@dimen/mini_margin"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
@@ -81,7 +81,7 @@
                         android:id="@+id/tvReleaseDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_marginBottom="@dimen/mini_margin" />
 
                     <TextView
                         android:id="@+id/tvRating"
@@ -102,7 +102,7 @@
                 android:id="@+id/tvTrailersHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/standard_margin"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:text="@string/section_trailers"
@@ -110,7 +110,7 @@
                 android:textStyle="bold" />
 
             <LinearLayout
-                android:id="@+id/tvTrailersContent"
+                android:id="@+id/llTrailersContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -121,16 +121,16 @@
                 android:id="@+id/tvReviewsHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/standard_margin"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginTop="@dimen/standard_margin"
                 android:text="@string/section_reviews"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <LinearLayout
-                android:id="@+id/tvReviewsContent"
+                android:id="@+id/llReviewsContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"

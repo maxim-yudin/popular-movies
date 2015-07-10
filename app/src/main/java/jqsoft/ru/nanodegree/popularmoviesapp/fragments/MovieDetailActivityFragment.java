@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -42,6 +43,8 @@ public class MovieDetailActivityFragment extends Fragment {
     private TextView tvOverview;
     private ProgressBar pbLoading;
     private ScrollView svContent;
+    private LinearLayout llReviewsContent;
+    private LinearLayout llTrailersContent;
 
     private Movie movie;
     private ArrayList<Trailer> trailerList;
@@ -87,6 +90,8 @@ public class MovieDetailActivityFragment extends Fragment {
         tvRating = (TextView) fragmentView.findViewById(R.id.tvRating);
         tvReleaseDate = (TextView) fragmentView.findViewById(R.id.tvReleaseDate);
         tvOverview = (TextView) fragmentView.findViewById(R.id.tvOverview);
+        llReviewsContent = (LinearLayout) fragmentView.findViewById(R.id.llReviewsContent);
+        llTrailersContent = (LinearLayout) fragmentView.findViewById(R.id.llTrailersContent);
         return fragmentView;
     }
 
@@ -132,8 +137,7 @@ public class MovieDetailActivityFragment extends Fragment {
             trailerList = savedInstanceState.getParcelableArrayList(TRAILER_LIST);
             reviewList = savedInstanceState.getParcelableArrayList(REVIEW_LIST);
 
-            pbLoading.setVisibility(View.GONE);
-            svContent.setVisibility(View.VISIBLE);
+            showReviewsAndTrailers();
         }
     }
 
@@ -183,13 +187,37 @@ public class MovieDetailActivityFragment extends Fragment {
             trailerList = new ArrayList<>(result.trailerList);
             reviewList = new ArrayList<>(result.reviewList);
 
-            pbLoading.setVisibility(View.GONE);
-            svContent.setVisibility(View.VISIBLE);
+            showReviewsAndTrailers();
         }
     }
 
     private class MoreInfoAboutMovieResult {
         public List<Trailer> trailerList;
         public List<Review> reviewList;
+    }
+
+    private void showReviewsAndTrailers() {
+        final LayoutInflater inflater = getActivity().getLayoutInflater();
+        llReviewsContent.removeAllViews();
+        if (reviewList != null && reviewList.size() != 0) {
+            View rowReview;
+            TextView tvAuthor;
+            TextView tvComment;
+            for (Review review : reviewList) {
+                rowReview = inflater.inflate(R.layout.row_review, llReviewsContent, false);
+                tvAuthor = (TextView) rowReview.findViewById(R.id.tvAuthor);
+                tvAuthor.setText(review.Author);
+                tvComment = (TextView) rowReview.findViewById(R.id.tvComment);
+                tvComment.setText(review.Content);
+                llReviewsContent.addView(rowReview);
+            }
+        } else {
+            final TextView tvEmpty = (TextView) inflater.inflate(R.layout.row_empty, llReviewsContent, false);
+            tvEmpty.setText(R.string.no_reviews);
+            llReviewsContent.addView(tvEmpty);
+        }
+
+        pbLoading.setVisibility(View.GONE);
+        svContent.setVisibility(View.VISIBLE);
     }
 }

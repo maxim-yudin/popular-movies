@@ -20,5 +20,7 @@
     <string name="pref_sort_order_favorites_value" translatable="false">favorites</string>
 
     <string name="section_trailers">Trailers</string>
+    <string name="no_trailers">No trailers</string>
     <string name="section_reviews">Reviews</string>
+    <string name="no_reviews">No reviews</string>
 </resources>
