@@ -14,13 +14,13 @@ public class Trailer implements Parcelable {
     private static final String PARAM_YOUTUBE_VIDEO = "v";
 
     @SerializedName("key")
-    private String Key;
+    public String Key;
 
     @SerializedName("name")
     public String Name;
 
-    public String getYoutubeLink() {
-        return getYoutubeBaseUrlBuilder().appendQueryParameter(PARAM_YOUTUBE_VIDEO, Key)
+    public static String getYoutubeLinkByKey(String videoKey) {
+        return getYoutubeBaseUrlBuilder().appendQueryParameter(PARAM_YOUTUBE_VIDEO, videoKey)
                 .toString();
     }
 

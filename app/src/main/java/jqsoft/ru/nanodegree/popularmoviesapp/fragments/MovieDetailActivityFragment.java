@@ -1,5 +1,7 @@
 package jqsoft.ru.nanodegree.popularmoviesapp.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -217,7 +219,47 @@ public class MovieDetailActivityFragment extends Fragment {
             llReviewsContent.addView(tvEmpty);
         }
 
+        llTrailersContent.removeAllViews();
+        if (trailerList != null && trailerList.size() != 0) {
+            View rowTrailer;
+            TextView tvTrailerTitle;
+            for (Trailer trailer : trailerList) {
+                rowTrailer = inflater.inflate(R.layout.row_trailer, llTrailersContent, false);
+                tvTrailerTitle = (TextView) rowTrailer.findViewById(R.id.tvTrailerTitle);
+                tvTrailerTitle.setText(trailer.Name);
+                tvTrailerTitle.setTag(trailer.Key);
+                tvTrailerTitle.setOnClickListener(trailerClick);
+                llTrailersContent.addView(rowTrailer);
+            }
+        } else {
+            final TextView tvEmpty = (TextView) inflater.inflate(R.layout.row_empty, llTrailersContent, false);
+            tvEmpty.setText(R.string.no_trailers);
+            llTrailersContent.addView(tvEmpty);
+        }
+
         pbLoading.setVisibility(View.GONE);
         svContent.setVisibility(View.VISIBLE);
+    }
+
+    final View.OnClickListener trailerClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String youtubeKey = (String) view.getTag();
+            if (youtubeKey != null) {
+                openTrailer(youtubeKey);
+            }
+        }
+    };
+
+    public void openTrailer(String youtubeKey) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + youtubeKey));
+        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Trailer.getYoutubeLinkByKey(youtubeKey)));
+            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivity(intent);
+            }
+        }
     }
 }

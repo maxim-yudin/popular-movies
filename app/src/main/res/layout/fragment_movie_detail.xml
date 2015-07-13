@@ -74,6 +74,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/mini_margin"
+                        android:textColor="@color/header"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
@@ -106,6 +107,7 @@
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:text="@string/section_trailers"
+                android:textColor="@color/header"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -113,8 +115,6 @@
                 android:id="@+id/llTrailersContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:orientation="vertical" />
 
             <TextView
@@ -126,6 +126,7 @@
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="@dimen/standard_margin"
                 android:text="@string/section_reviews"
+                android:textColor="@color/header"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
