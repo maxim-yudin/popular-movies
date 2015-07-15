@@ -5,7 +5,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -60,6 +65,10 @@ public class MovieDetailActivityFragment extends Fragment {
         fragment.setArguments(args);
 
         return fragment;
+    }
+
+    public MovieDetailActivityFragment() {
+        setHasOptionsMenu(true);
     }
 
     private Movie getMovie() {
@@ -239,6 +248,8 @@ public class MovieDetailActivityFragment extends Fragment {
 
         pbLoading.setVisibility(View.GONE);
         svContent.setVisibility(View.VISIBLE);
+
+        getActivity().supportInvalidateOptionsMenu();
     }
 
     final View.OnClickListener trailerClick = new View.OnClickListener() {
@@ -259,6 +270,27 @@ public class MovieDetailActivityFragment extends Fragment {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Trailer.getYoutubeLinkByKey(youtubeKey)));
             if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
                 startActivity(intent);
+            }
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_details, menu);
+        MenuItem mnuShare = menu.findItem(R.id.action_share);
+        boolean isTrailersPresent = trailerList != null && trailerList.size() != 0;
+        mnuShare.setVisible(isTrailersPresent);
+        if (isTrailersPresent) {
+            ShareActionProvider shareActionProvider =
+                    (ShareActionProvider) MenuItemCompat.getActionProvider(mnuShare);
+            if (shareActionProvider != null) {
+                Intent shareIntent = new Intent();
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.trailer_share_text,
+                        Trailer.getYoutubeLinkByKey(trailerList.get(0).Key), movie.OriginalTitle));
+                shareIntent.setType("text/plain");
+                shareActionProvider.setShareIntent(shareIntent);
             }
         }
     }

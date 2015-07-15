@@ -23,4 +23,7 @@
     <string name="no_trailers">No trailers</string>
     <string name="section_reviews">Reviews</string>
     <string name="no_reviews">No reviews</string>
+
+    <string name="action_trailer_share">Share trailer</string>
+    <string name="trailer_share_text">Watch this interesting trailer %1$s of the movie %2$s.</string>
 </resources>
