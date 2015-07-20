@@ -30,6 +30,7 @@ import jqsoft.ru.nanodegree.popularmoviesapp.R;
 import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbApi;
 import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbService;
 import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
+import jqsoft.ru.nanodegree.popularmoviesapp.customviews.CheckableImageView;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Review;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.ReviewListResult;
@@ -52,6 +53,7 @@ public class MovieDetailActivityFragment extends Fragment {
     private ScrollView svContent;
     private LinearLayout llReviewsContent;
     private LinearLayout llTrailersContent;
+    private CheckableImageView civFavorited;
 
     private Movie movie;
     private ArrayList<Trailer> trailerList;
@@ -103,6 +105,13 @@ public class MovieDetailActivityFragment extends Fragment {
         tvOverview = (TextView) fragmentView.findViewById(R.id.tvOverview);
         llReviewsContent = (LinearLayout) fragmentView.findViewById(R.id.llReviewsContent);
         llTrailersContent = (LinearLayout) fragmentView.findViewById(R.id.llTrailersContent);
+        civFavorited = (CheckableImageView) fragmentView.findViewById(R.id.civFavorited);
+        civFavorited.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                civFavorited.toggle();
+            }
+        });
         return fragmentView;
     }
 
