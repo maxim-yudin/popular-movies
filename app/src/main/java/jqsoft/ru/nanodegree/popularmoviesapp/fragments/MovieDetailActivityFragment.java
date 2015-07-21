@@ -30,6 +30,7 @@ import jqsoft.ru.nanodegree.popularmoviesapp.R;
 import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbApi;
 import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbService;
 import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
+import jqsoft.ru.nanodegree.popularmoviesapp.common.FavoritesStorage;
 import jqsoft.ru.nanodegree.popularmoviesapp.customviews.CheckableImageView;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Review;
@@ -109,6 +110,11 @@ public class MovieDetailActivityFragment extends Fragment {
         civFavorited.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (FavoritesStorage.isFavorite(getActivity(), movie.Id)) {
+                    FavoritesStorage.removeFavorite(getActivity(), movie.Id);
+                } else {
+                    FavoritesStorage.addFavorite(getActivity(), movie);
+                }
                 civFavorited.toggle();
             }
         });
@@ -149,6 +155,7 @@ public class MovieDetailActivityFragment extends Fragment {
         tvReleaseDate.setText(getString(R.string.release_date, movie.ReleaseDate));
         tvRating.setText(getString(R.string.rating, movie.VoteAverage));
         tvOverview.setText(movie.Overview);
+        civFavorited.setChecked(FavoritesStorage.isFavorite(getActivity(), movie.Id));
 
         if (savedInstanceState == null || !savedInstanceState.containsKey(TRAILER_LIST)
                 || !savedInstanceState.containsKey(REVIEW_LIST)) {

@@ -17,6 +17,13 @@
         android:verticalSpacing="0dp"
         android:visibility="gone" />
 
+    <TextView
+        android:id="@android:id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/no_movies" />
+
     <ProgressBar
         android:id="@+id/pbLoading"
         android:layout_width="wrap_content"

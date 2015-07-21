@@ -28,6 +28,7 @@ import jqsoft.ru.nanodegree.popularmoviesapp.activities.MovieDetailActivity;
 import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbApi;
 import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbService;
 import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
+import jqsoft.ru.nanodegree.popularmoviesapp.common.FavoritesStorage;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.MovieListResult;
 
@@ -84,6 +85,10 @@ public class MainActivityFragment extends Fragment {
         if (!currentSortBy.equals(newSortBy)) {
             currentSortBy = newSortBy;
             getMovies();
+        } else {
+            if (currentSortBy.equals(getString(R.string.pref_sort_order_favorites_value))) {
+                getMovies();
+            }
         }
     }
 
@@ -101,6 +106,7 @@ public class MainActivityFragment extends Fragment {
                 startActivity(movieDetailIntent);
             }
         });
+        gvMovieList.setEmptyView(fragmentView.findViewById(android.R.id.empty));
         pbLoading = (ProgressBar) fragmentView.findViewById(R.id.pbLoading);
         return fragmentView;
     }
@@ -110,6 +116,7 @@ public class MainActivityFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             pbLoading.setVisibility(View.VISIBLE);
+            gvMovieList.getEmptyView().setVisibility(View.GONE);
             gvMovieList.setVisibility(View.GONE);
         }
 
@@ -120,8 +127,9 @@ public class MainActivityFragment extends Fragment {
                     MovieDbService movieDbService = movieDbApi.getService();
                     return movieDbService.getMovieList(currentSortBy);
                 } else {
-                    // here will be favorites list
-                    return null;
+                    MovieListResult movieListResult = new MovieListResult();
+                    movieListResult.setMovieList(FavoritesStorage.getFavorites(getActivity()));
+                    return movieListResult;
                 }
             } catch (Exception e) {
                 // if some erros occurs, e.g. no internet
