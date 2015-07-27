@@ -6,18 +6,44 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import jqsoft.ru.nanodegree.popularmoviesapp.fragments.MainActivityFragment;
 import jqsoft.ru.nanodegree.popularmoviesapp.R;
+import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
+import jqsoft.ru.nanodegree.popularmoviesapp.fragments.MainActivityFragment;
+import jqsoft.ru.nanodegree.popularmoviesapp.fragments.MovieDetailActivityFragment;
+import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callbacks {
+    private boolean mTwoPane;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
-            MainActivityFragment mainFragment = MainActivityFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().add(android.R.id.content, mainFragment).commit();
+        if (findViewById(R.id.movie_detail_content) != null) {
+            mTwoPane = true;
+
+            ((MainActivityFragment) getSupportFragmentManager()
+                    .findFragmentById(android.R.id.content))
+                    .setActivateOnMovieClick(true);
+        }
+    }
+
+    /**
+     * Callback method indicating that the movie was selected.
+     */
+    @Override
+    public void onMovieSelected(Movie chosenMovie) {
+        if (mTwoPane) {
+            MovieDetailActivityFragment movieDetailActivityFragment =
+                    MovieDetailActivityFragment.newInstance(chosenMovie);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_content, movieDetailActivityFragment)
+                    .commit();
+        } else {
+            Intent movieDetailIntent = new Intent(this, MovieDetailActivity.class);
+            movieDetailIntent.putExtra(Constants.MOVIE, chosenMovie);
+            startActivity(movieDetailIntent);
         }
     }
 

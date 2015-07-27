@@ -1,9 +1,11 @@
 package jqsoft.ru.nanodegree.popularmoviesapp.fragments;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -24,10 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jqsoft.ru.nanodegree.popularmoviesapp.R;
-import jqsoft.ru.nanodegree.popularmoviesapp.activities.MovieDetailActivity;
 import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbApi;
 import jqsoft.ru.nanodegree.popularmoviesapp.api.MovieDbService;
-import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
 import jqsoft.ru.nanodegree.popularmoviesapp.common.FavoritesStorage;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.MovieListResult;
@@ -35,15 +35,91 @@ import jqsoft.ru.nanodegree.popularmoviesapp.models.MovieListResult;
 public class MainActivityFragment extends Fragment {
     public static final String MOVIE_LIST = "movieList";
 
+    private static final String STATE_ACTIVATED_POSITION = "activated_position";
+
+    /**
+     * The fragment's current callback object, which is notified of movie item
+     * clicks.
+     */
+    private Callbacks mCallbacks = sDummyCallbacks;
+    /**
+     * The current activated item position. Only used on tablets.
+     */
+    private int mActivatedPosition = GridView.INVALID_POSITION;
+
     private SharedPreferences settings;
     private GridView gvMovieList;
     private ProgressBar pbLoading;
     private String currentSortBy;
     private ArrayList<Movie> movieList;
+    private boolean isActivateOnMovieClick = false;
 
-    public static MainActivityFragment newInstance() {
-        MainActivityFragment fragment = new MainActivityFragment();
-        return fragment;
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void setActivateOnMovieClick(boolean activateOnMovieClick) {
+        gvMovieList.setChoiceMode(activateOnMovieClick
+                ? GridView.CHOICE_MODE_SINGLE
+                : GridView.CHOICE_MODE_NONE);
+        isActivateOnMovieClick = activateOnMovieClick;
+    }
+
+    /**
+     * A callback interface that allows main activity to be notified of movie
+     * selection.
+     */
+    public interface Callbacks {
+        void onMovieSelected(Movie chosenMovie);
+    }
+
+    /**
+     * A dummy implementation of the {@link Callbacks} interface that does
+     * nothing. Used only when this fragment is not attached to an activity.
+     */
+    private static Callbacks sDummyCallbacks = new Callbacks() {
+        @Override
+        public void onMovieSelected(Movie chosenMovie) {
+        }
+    };
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (!(activity instanceof Callbacks)) {
+            throw new IllegalStateException("Activity must implement fragment's callbacks.");
+        }
+
+        mCallbacks = (Callbacks) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        // Reset the active callbacks interface to the dummy implementation.
+        mCallbacks = sDummyCallbacks;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (movieList != null) {
+            outState.putParcelableArrayList(MOVIE_LIST, movieList);
+        }
+        if (mActivatedPosition != GridView.INVALID_POSITION) {
+            // Save the activated item position.
+            outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void setActivatedPosition(int position) {
+        if (position == GridView.INVALID_POSITION) {
+            gvMovieList.setItemChecked(mActivatedPosition, false);
+        } else {
+            gvMovieList.setItemChecked(position, true);
+        }
+
+        mActivatedPosition = position;
     }
 
     @Override
@@ -63,14 +139,6 @@ public class MainActivityFragment extends Fragment {
             pbLoading.setVisibility(View.GONE);
             gvMovieList.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        if (movieList != null) {
-            outState.putParcelableArrayList(MOVIE_LIST, movieList);
-        }
-        super.onSaveInstanceState(outState);
     }
 
     private void getMovies() {
@@ -100,15 +168,27 @@ public class MainActivityFragment extends Fragment {
         gvMovieList.setOnItemClickListener(new GridView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (isActivateOnMovieClick) {
+                    mActivatedPosition = position;
+                }
                 Movie chosenMovie = (Movie) parent.getItemAtPosition(position);
-                Intent movieDetailIntent = new Intent(getActivity(), MovieDetailActivity.class);
-                movieDetailIntent.putExtra(Constants.MOVIE, chosenMovie);
-                startActivity(movieDetailIntent);
+                mCallbacks.onMovieSelected(chosenMovie);
             }
         });
         gvMovieList.setEmptyView(fragmentView.findViewById(android.R.id.empty));
         pbLoading = (ProgressBar) fragmentView.findViewById(R.id.pbLoading);
         return fragmentView;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Restore the previously activated item position.
+        if (savedInstanceState != null
+                && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+            setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
+        }
     }
 
     private class GetMovieListTask extends AsyncTask<Void, Void, MovieListResult> {
@@ -152,6 +232,12 @@ public class MainActivityFragment extends Fragment {
             movieList = new ArrayList<>(result.getMovieList());
             gvMovieList.setAdapter(new MovieAdapter(getActivity(), movieList));
 
+            if (isActivateOnMovieClick) {
+                if (mActivatedPosition == GridView.INVALID_POSITION && movieList.size() != 0) {
+                    gvMovieList.performItemClick(gvMovieList, 0, gvMovieList.getItemIdAtPosition(0));
+                }
+            }
+
             pbLoading.setVisibility(View.GONE);
             gvMovieList.setVisibility(View.VISIBLE);
         }
@@ -192,7 +278,7 @@ public class MainActivityFragment extends Fragment {
                 posterHolder = (PosterHolder) convertView.getTag();
             }
 
-            Picasso.with(mContext).load(getItem(position).getPosterUrl()).into(posterHolder.ivPoster, new Callback() {
+            Picasso.with(mContext).load(getItem(position).getPosterUrl()).fit().into(posterHolder.ivPoster, new Callback() {
                 @Override
                 public void onSuccess() {
                     posterHolder.pbPosterLoading.setVisibility(View.GONE);
