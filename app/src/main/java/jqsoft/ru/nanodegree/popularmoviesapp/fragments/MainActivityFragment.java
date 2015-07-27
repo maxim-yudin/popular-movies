@@ -33,7 +33,7 @@ import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.MovieListResult;
 
 public class MainActivityFragment extends Fragment {
-    public static final String MOVIE_LIST = "movieList";
+    private static final String MOVIE_LIST = "movieList";
 
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
@@ -52,15 +52,8 @@ public class MainActivityFragment extends Fragment {
     private ProgressBar pbLoading;
     private String currentSortBy;
     private ArrayList<Movie> movieList;
-    private boolean isActivateOnMovieClick = false;
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void setActivateOnMovieClick(boolean activateOnMovieClick) {
-        gvMovieList.setChoiceMode(activateOnMovieClick
-                ? GridView.CHOICE_MODE_SINGLE
-                : GridView.CHOICE_MODE_NONE);
-        isActivateOnMovieClick = activateOnMovieClick;
-    }
+    private boolean isActivateOnMovieClick = false;
 
     /**
      * A callback interface that allows main activity to be notified of movie
@@ -74,7 +67,7 @@ public class MainActivityFragment extends Fragment {
      * A dummy implementation of the {@link Callbacks} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
      */
-    private static Callbacks sDummyCallbacks = new Callbacks() {
+    private static final Callbacks sDummyCallbacks = new Callbacks() {
         @Override
         public void onMovieSelected(Movie chosenMovie) {
         }
@@ -125,6 +118,10 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            isActivateOnMovieClick = (gvMovieList.getChoiceMode() == GridView.CHOICE_MODE_SINGLE);
+        }
 
         settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
@@ -244,8 +241,8 @@ public class MainActivityFragment extends Fragment {
     }
 
     public class MovieAdapter extends BaseAdapter {
-        private Context mContext;
-        List<Movie> mMovieList;
+        private final Context mContext;
+        final List<Movie> mMovieList;
 
         public MovieAdapter(Context context, List<Movie> movieList) {
             mContext = context;

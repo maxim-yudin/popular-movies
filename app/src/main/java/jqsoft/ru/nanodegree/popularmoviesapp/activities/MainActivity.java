@@ -22,10 +22,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
         if (findViewById(R.id.movie_detail_content) != null) {
             mTwoPane = true;
-
-            ((MainActivityFragment) getSupportFragmentManager()
-                    .findFragmentById(android.R.id.content))
-                    .setActivateOnMovieClick(true);
         }
     }
 
