@@ -9,4 +9,7 @@
     <style name="GridViewStyle">
     </style>
 
+    <style name="GridViewItemStyle">
+    </style>
+
 </resources>
