@@ -275,7 +275,7 @@ public class MainActivityFragment extends Fragment {
                 posterHolder = (PosterHolder) convertView.getTag();
             }
 
-            Picasso.with(mContext).load(getItem(position).getPosterUrl()).fit().into(posterHolder.ivPoster, new Callback() {
+            Picasso.with(mContext).load(getItem(position).getPosterUrl()).into(posterHolder.ivPoster, new Callback() {
                 @Override
                 public void onSuccess() {
                     posterHolder.pbPosterLoading.setVisibility(View.GONE);
