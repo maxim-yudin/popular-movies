@@ -9,7 +9,7 @@
     tools:context=".MainActivity">
 
     <fragment
-        android:id="@android:id/content"
+        android:id="@+id/movie_list_content"
         android:name="jqsoft.ru.nanodegree.popularmoviesapp.fragments.MainActivityFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"

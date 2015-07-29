@@ -3,9 +3,9 @@ package jqsoft.ru.nanodegree.popularmoviesapp.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import jqsoft.ru.nanodegree.popularmoviesapp.R;
 import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
 import jqsoft.ru.nanodegree.popularmoviesapp.fragments.MovieDetailActivityFragment;
-import jqsoft.ru.nanodegree.popularmoviesapp.R;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 
 
@@ -22,7 +22,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                 if (savedInstanceState == null) {
                     MovieDetailActivityFragment movieDetailActivityFragment =
                             MovieDetailActivityFragment.newInstance((Movie) extras.getParcelable(Constants.MOVIE));
-                    getSupportFragmentManager().beginTransaction().add(android.R.id.content, movieDetailActivityFragment).commit();
+                    getSupportFragmentManager().beginTransaction().add(R.id.movie_detail_content, movieDetailActivityFragment).commit();
                 }
             }
         }
