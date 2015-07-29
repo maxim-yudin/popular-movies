@@ -105,11 +105,17 @@ public class MainActivityFragment extends Fragment {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setActivatedPosition(int position) {
+    private void setActivatedPosition(final int position) {
         if (position == GridView.INVALID_POSITION) {
             gvMovieList.setItemChecked(mActivatedPosition, false);
         } else {
             gvMovieList.setItemChecked(position, true);
+            gvMovieList.post(new Runnable() {
+                @Override
+                public void run() {
+                    gvMovieList.smoothScrollToPosition(position);
+                }
+            });
         }
 
         mActivatedPosition = position;
