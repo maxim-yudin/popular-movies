@@ -1,5 +1,6 @@
 package jqsoft.ru.nanodegree.popularmoviesapp.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -42,6 +43,12 @@ public class MovieDetailActivityFragment extends Fragment {
     public static final String TRAILER_LIST = "trailerList";
     public static final String REVIEW_LIST = "reviewList";
 
+    /**
+     * The fragment's current callback object, which is notified of movie item
+     * clicks.
+     */
+    private Callbacks mCallbacks = sDummyCallbacks;
+
     private ImageView ivBackDrop;
     private ProgressBar pbBackDropLoading;
     private ImageView ivPoster;
@@ -59,6 +66,44 @@ public class MovieDetailActivityFragment extends Fragment {
     private Movie movie;
     private ArrayList<Trailer> trailerList;
     private ArrayList<Review> reviewList;
+
+
+    /**
+     * A callback interface that allows main activity to be notified of movie
+     * removing from favorites.
+     */
+    public interface Callbacks {
+        void onChangedFavoriteStatus();
+    }
+
+    /**
+     * A dummy implementation of the {@link Callbacks} interface that does
+     * nothing. Used only when this fragment is not attached to an activity.
+     */
+    private static final Callbacks sDummyCallbacks = new Callbacks() {
+        @Override
+        public void onChangedFavoriteStatus() {
+        }
+    };
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (!(activity instanceof Callbacks)) {
+            return;
+        }
+
+        mCallbacks = (Callbacks) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        // Reset the active callbacks interface to the dummy implementation.
+        mCallbacks = sDummyCallbacks;
+    }
 
     public static MovieDetailActivityFragment newInstance(Movie movie) {
         MovieDetailActivityFragment fragment = new MovieDetailActivityFragment();
@@ -116,6 +161,7 @@ public class MovieDetailActivityFragment extends Fragment {
                     FavoritesStorage.addFavorite(getActivity(), movie);
                 }
                 civFavorited.toggle();
+                mCallbacks.onChangedFavoriteStatus();
             }
         });
         return fragmentView;

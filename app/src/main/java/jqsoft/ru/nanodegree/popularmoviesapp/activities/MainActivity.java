@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import jqsoft.ru.nanodegree.popularmoviesapp.R;
 import jqsoft.ru.nanodegree.popularmoviesapp.common.Constants;
@@ -12,7 +13,8 @@ import jqsoft.ru.nanodegree.popularmoviesapp.fragments.MainActivityFragment;
 import jqsoft.ru.nanodegree.popularmoviesapp.fragments.MovieDetailActivityFragment;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 
-public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callbacks {
+public class MainActivity extends AppCompatActivity
+        implements MainActivityFragment.Callbacks, MovieDetailActivityFragment.Callbacks {
     private boolean mTwoPane;
 
     @Override
@@ -60,5 +62,34 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Callback method indicating that the favorite status of any movie was changed.
+     */
+    @Override
+    public void onChangedFavoriteStatus() {
+        if (mTwoPane) {
+            MainActivityFragment movieListActivityFragment =
+                    (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.movie_list_content);
+            if (movieListActivityFragment != null) {
+                movieListActivityFragment.updateFavoriteList();
+            }
+        }
+    }
+
+    @Override
+    public void onUpdateMovieDetailViewWhetherMovieListEmpty(boolean isMovieListEmpty) {
+        if (mTwoPane) {
+            if (isMovieListEmpty) {
+                MovieDetailActivityFragment movieDetailActivityFragment =
+                        (MovieDetailActivityFragment) getSupportFragmentManager().findFragmentById(R.id.movie_detail_content);
+                if (movieDetailActivityFragment != null) {
+                    getSupportFragmentManager().beginTransaction()
+                            .remove(movieDetailActivityFragment).commit();
+                }
+            }
+            findViewById(R.id.movie_detail_content).setVisibility(isMovieListEmpty ? View.GONE : View.VISIBLE);
+        }
     }
 }

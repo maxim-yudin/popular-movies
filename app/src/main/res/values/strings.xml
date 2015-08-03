@@ -28,4 +28,5 @@
     <string name="trailer_share_text">Watch this interesting trailer %1$s of the movie %2$s.</string>
 
     <string name="no_movies">No movies</string>
+    <string name="no_favorite_movies">No favorite movies</string>
 </resources>

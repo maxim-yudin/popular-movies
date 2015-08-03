@@ -17,6 +17,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Callback;
@@ -48,6 +49,7 @@ public class MainActivityFragment extends Fragment {
     private int mActivatedPosition = GridView.INVALID_POSITION;
 
     private SharedPreferences settings;
+    private TextView emptyView;
     private GridView gvMovieList;
     private ProgressBar pbLoading;
     private String currentSortBy;
@@ -57,10 +59,12 @@ public class MainActivityFragment extends Fragment {
 
     /**
      * A callback interface that allows main activity to be notified of movie
-     * selection.
+     * selection or check movie list.
      */
     public interface Callbacks {
         void onMovieSelected(Movie chosenMovie);
+
+        void onUpdateMovieDetailViewWhetherMovieListEmpty(boolean isEmpty);
     }
 
     /**
@@ -70,6 +74,10 @@ public class MainActivityFragment extends Fragment {
     private static final Callbacks sDummyCallbacks = new Callbacks() {
         @Override
         public void onMovieSelected(Movie chosenMovie) {
+        }
+
+        @Override
+        public void onUpdateMovieDetailViewWhetherMovieListEmpty(boolean isEmpty) {
         }
     };
 
@@ -155,11 +163,18 @@ public class MainActivityFragment extends Fragment {
                 getString(R.string.pref_sort_order_popularity_desc_value));
         if (!currentSortBy.equals(newSortBy)) {
             currentSortBy = newSortBy;
+            mActivatedPosition = GridView.INVALID_POSITION;
             getMovies();
         } else {
-            if (currentSortBy.equals(getString(R.string.pref_sort_order_favorites_value))) {
-                getMovies();
-            }
+            updateFavoriteList();
+        }
+    }
+
+    // update favorite list
+    public void updateFavoriteList() {
+        if (currentSortBy.equals(getString(R.string.pref_sort_order_favorites_value))) {
+            mActivatedPosition = GridView.INVALID_POSITION;
+            getMovies();
         }
     }
 
@@ -178,7 +193,8 @@ public class MainActivityFragment extends Fragment {
                 mCallbacks.onMovieSelected(chosenMovie);
             }
         });
-        gvMovieList.setEmptyView(fragmentView.findViewById(android.R.id.empty));
+        emptyView = (TextView) fragmentView.findViewById(android.R.id.empty);
+        gvMovieList.setEmptyView(emptyView);
         pbLoading = (ProgressBar) fragmentView.findViewById(R.id.pbLoading);
         return fragmentView;
     }
@@ -199,6 +215,11 @@ public class MainActivityFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             pbLoading.setVisibility(View.VISIBLE);
+            if (!currentSortBy.equals(getString(R.string.pref_sort_order_favorites_value))) {
+                emptyView.setText(R.string.no_movies);
+            } else {
+                emptyView.setText(R.string.no_favorite_movies);
+            }
             gvMovieList.getEmptyView().setVisibility(View.GONE);
             gvMovieList.setVisibility(View.GONE);
         }
@@ -237,8 +258,15 @@ public class MainActivityFragment extends Fragment {
 
             if (isActivateOnMovieClick) {
                 if (mActivatedPosition == GridView.INVALID_POSITION && movieList.size() != 0) {
-                    gvMovieList.performItemClick(gvMovieList, 0, gvMovieList.getItemIdAtPosition(0));
+                    gvMovieList.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            gvMovieList.performItemClick(gvMovieList, 0, gvMovieList.getItemIdAtPosition(0));
+                        }
+                    });
                 }
+
+                mCallbacks.onUpdateMovieDetailViewWhetherMovieListEmpty(movieList.size() == 0);
             }
 
             pbLoading.setVisibility(View.GONE);
