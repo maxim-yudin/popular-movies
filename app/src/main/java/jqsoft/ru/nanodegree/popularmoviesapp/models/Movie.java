@@ -5,6 +5,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
+import com.tjeannin.provigen.ProviGenBaseContract;
+import com.tjeannin.provigen.annotation.Column;
+import com.tjeannin.provigen.annotation.ContentUri;
+
+import jqsoft.ru.nanodegree.popularmoviesapp.providers.MovieDbProvider;
 
 public class Movie implements Parcelable {
     private static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/";
@@ -80,4 +85,30 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
+
+    /**
+     * Contract for DB and content provider
+     */
+    public interface Contract extends ProviGenBaseContract {
+        @Column(Column.Type.TEXT)
+        String ORIGINAL_TITLE = "original_title";
+
+        @Column(Column.Type.TEXT)
+        String OVERVIEW = "overview";
+
+        @Column(Column.Type.TEXT)
+        String VOTE_AVERAGE = "vote_average";
+
+        @Column(Column.Type.TEXT)
+        String RELEASE_DATE = "release_date";
+
+        @Column(Column.Type.TEXT)
+        String BACKDROP_PATH = "backdrop_path";
+
+        @Column(Column.Type.TEXT)
+        String POSTER_PATH = "poster_path";
+
+        @ContentUri
+        Uri CONTENT_URI = MovieDbProvider.getContentUri("movies");
+    }
 }

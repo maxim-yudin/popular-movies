@@ -5,6 +5,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
+import com.tjeannin.provigen.ProviGenBaseContract;
+import com.tjeannin.provigen.annotation.Column;
+import com.tjeannin.provigen.annotation.ContentUri;
+
+import jqsoft.ru.nanodegree.popularmoviesapp.providers.MovieDbProvider;
 
 /**
  * Created by maximyudin on 06.07.15.
@@ -56,4 +61,21 @@ public class Trailer implements Parcelable {
             return new Trailer[size];
         }
     };
+
+    /**
+     * Contract for DB and content provider
+     */
+    public interface Contract extends ProviGenBaseContract {
+        @Column(Column.Type.TEXT)
+        String MOVIE_ID = "movie_id";
+
+        @Column(Column.Type.TEXT)
+        String KEY = "key";
+
+        @Column(Column.Type.TEXT)
+        String NAME = "name";
+
+        @ContentUri
+        Uri CONTENT_URI = MovieDbProvider.getContentUri("trailers");
+    }
 }

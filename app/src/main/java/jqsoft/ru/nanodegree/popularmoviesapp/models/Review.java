@@ -1,9 +1,15 @@
 package jqsoft.ru.nanodegree.popularmoviesapp.models;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
+import com.tjeannin.provigen.ProviGenBaseContract;
+import com.tjeannin.provigen.annotation.Column;
+import com.tjeannin.provigen.annotation.ContentUri;
+
+import jqsoft.ru.nanodegree.popularmoviesapp.providers.MovieDbProvider;
 
 /**
  * Created by maximyudin on 06.07.15.
@@ -43,4 +49,21 @@ public class Review implements Parcelable {
             return new Review[size];
         }
     };
+
+    /**
+     * Contract for DB and content provider
+     */
+    public interface Contract extends ProviGenBaseContract {
+        @Column(Column.Type.TEXT)
+        String MOVIE_ID = "movie_id";
+
+        @Column(Column.Type.TEXT)
+        String AUTHOR = "author";
+
+        @Column(Column.Type.TEXT)
+        String CONTENT = "content";
+
+        @ContentUri
+        Uri CONTENT_URI = MovieDbProvider.getContentUri("reviews");
+    }
 }
