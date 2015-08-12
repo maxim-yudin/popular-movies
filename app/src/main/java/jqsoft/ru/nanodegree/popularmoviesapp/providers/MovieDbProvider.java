@@ -18,8 +18,7 @@ public class MovieDbProvider extends ProviGenProvider {
     private static final String DB_NAME = "MovieDb";
     private static final int DB_VERSION = 1;
 
-    private static final Uri.Builder BASE_URI_BUILDER =
-            Uri.parse("content://jqsoft.ru.nanodegree.popularmoviesapp").buildUpon();
+    public static final String AUTHORITY = "content://jqsoft.ru.nanodegree.popularmoviesapp";
 
     private static final Class[] contracts = new Class[]{
             Movie.Contract.class, Trailer.Contract.class, Review.Contract.class};
@@ -35,6 +34,6 @@ public class MovieDbProvider extends ProviGenProvider {
     }
 
     public static Uri getContentUri(String path) {
-        return BASE_URI_BUILDER.appendPath(path).build();
+        return Uri.parse(AUTHORITY).buildUpon().appendPath(path).build();
     }
 }

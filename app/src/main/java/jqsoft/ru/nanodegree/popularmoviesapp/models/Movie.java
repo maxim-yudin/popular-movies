@@ -27,19 +27,19 @@ public class Movie implements Parcelable {
     @SerializedName("release_date")
     public String ReleaseDate;
     @SerializedName("backdrop_path")
-    private String backdropPath;
+    public String BackdropPath;
     @SerializedName("poster_path")
-    private String posterPath;
+    public String PosterPath;
 
     public String getPosterUrl() {
         return getImageBaseUrlBuilder().appendEncodedPath(PATH_POSTER_SIZE)
-                .appendEncodedPath(posterPath)
+                .appendEncodedPath(PosterPath)
                 .toString();
     }
 
     public String getBackdropUrl() {
         return getImageBaseUrlBuilder().appendEncodedPath(PATH_BACKDROP_IMAGE_SIZE)
-                .appendEncodedPath(backdropPath)
+                .appendEncodedPath(BackdropPath)
                 .toString();
     }
 
@@ -59,8 +59,8 @@ public class Movie implements Parcelable {
         dest.writeString(this.Overview);
         dest.writeString(this.VoteAverage);
         dest.writeString(this.ReleaseDate);
-        dest.writeString(this.backdropPath);
-        dest.writeString(this.posterPath);
+        dest.writeString(this.BackdropPath);
+        dest.writeString(this.PosterPath);
     }
 
     public Movie() {
@@ -72,8 +72,8 @@ public class Movie implements Parcelable {
         this.Overview = in.readString();
         this.VoteAverage = in.readString();
         this.ReleaseDate = in.readString();
-        this.backdropPath = in.readString();
-        this.posterPath = in.readString();
+        this.BackdropPath = in.readString();
+        this.PosterPath = in.readString();
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
