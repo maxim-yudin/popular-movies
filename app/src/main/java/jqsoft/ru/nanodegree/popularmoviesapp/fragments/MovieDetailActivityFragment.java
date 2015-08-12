@@ -1,8 +1,6 @@
 package jqsoft.ru.nanodegree.popularmoviesapp.fragments;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -42,8 +40,8 @@ import jqsoft.ru.nanodegree.popularmoviesapp.models.Trailer;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.TrailerListResult;
 
 public class MovieDetailActivityFragment extends Fragment {
-    public static final String TRAILER_LIST = "trailerList";
-    public static final String REVIEW_LIST = "reviewList";
+    private static final String TRAILER_LIST = "trailerList";
+    private static final String REVIEW_LIST = "reviewList";
 
     /**
      * The fragment's current callback object, which is notified of movie item
@@ -159,57 +157,7 @@ public class MovieDetailActivityFragment extends Fragment {
                 if (FavoritesStorage.isFavorite(getActivity(), movie.Id)) {
                     FavoritesStorage.removeFavorite(getActivity(), movie.Id);
                 } else {
-                    final ContentResolver contentResolver = getActivity().getContentResolver();
-
-                    ContentValues movieValues = new ContentValues();
-                    movieValues.put(Movie.Contract._ID, movie.Id);
-                    movieValues.put(Movie.Contract.BACKDROP_PATH, movie.BackdropPath);
-                    movieValues.put(Movie.Contract.ORIGINAL_TITLE, movie.OriginalTitle);
-                    movieValues.put(Movie.Contract.OVERVIEW, movie.Overview);
-                    movieValues.put(Movie.Contract.POSTER_PATH, movie.PosterPath);
-                    movieValues.put(Movie.Contract.RELEASE_DATE, movie.ReleaseDate);
-                    movieValues.put(Movie.Contract.VOTE_AVERAGE, movie.VoteAverage);
-                    contentResolver.delete(Movie.Contract.CONTENT_URI,
-                            Movie.Contract._ID + "= ?", new String[]{movie.Id});
-                    contentResolver.insert(Movie.Contract.CONTENT_URI, movieValues);
-
-                    if (trailerList != null && trailerList.size() != 0) {
-                        ArrayList<ContentValues> trailerListValues = new ArrayList<>();
-                        for (Trailer trailer : trailerList) {
-                            ContentValues trailerValues = new ContentValues();
-                            trailerValues.put(Trailer.Contract.MOVIE_ID, movie.Id);
-                            trailerValues.put(Trailer.Contract.KEY, trailer.Key);
-                            trailerValues.put(Trailer.Contract.NAME, trailer.Name);
-                            trailerListValues.add(trailerValues);
-                        }
-                        if (trailerListValues.size() != 0) {
-                            ContentValues[] trailerListArray = new ContentValues[trailerListValues.size()];
-                            trailerListValues.toArray(trailerListArray);
-                            contentResolver.delete(Trailer.Contract.CONTENT_URI,
-                                    Trailer.Contract.MOVIE_ID + "= ?", new String[]{movie.Id});
-                            contentResolver.bulkInsert(Trailer.Contract.CONTENT_URI, trailerListArray);
-                        }
-                    }
-
-                    if (reviewList != null && reviewList.size() != 0) {
-                        ArrayList<ContentValues> reviewListValues = new ArrayList<>();
-                        for (Review review : reviewList) {
-                            ContentValues reviewValues = new ContentValues();
-                            reviewValues.put(Review.Contract.MOVIE_ID, movie.Id);
-                            reviewValues.put(Review.Contract.AUTHOR, review.Author);
-                            reviewValues.put(Review.Contract.CONTENT, review.Content);
-                            reviewListValues.add(reviewValues);
-                        }
-                        if (reviewListValues.size() != 0) {
-                            ContentValues[] reviewListArray = new ContentValues[reviewListValues.size()];
-                            reviewListValues.toArray(reviewListArray);
-                            contentResolver.delete(Review.Contract.CONTENT_URI,
-                                    Review.Contract.MOVIE_ID + "= ?", new String[]{movie.Id});
-                            contentResolver.bulkInsert(Review.Contract.CONTENT_URI, reviewListArray);
-                        }
-                    }
-
-                    FavoritesStorage.addFavorite(getActivity(), movie);
+                    FavoritesStorage.addFavorite(getActivity(), movie, trailerList, reviewList);
                 }
                 civFavorited.toggle();
                 mCallbacks.onChangedFavoriteStatus();
@@ -365,7 +313,7 @@ public class MovieDetailActivityFragment extends Fragment {
         getActivity().supportInvalidateOptionsMenu();
     }
 
-    final View.OnClickListener trailerClick = new View.OnClickListener() {
+    private final View.OnClickListener trailerClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             String youtubeKey = (String) view.getTag();
@@ -375,7 +323,7 @@ public class MovieDetailActivityFragment extends Fragment {
         }
     };
 
-    public void openTrailer(String youtubeKey) {
+    private void openTrailer(String youtubeKey) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + youtubeKey));
         if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(intent);

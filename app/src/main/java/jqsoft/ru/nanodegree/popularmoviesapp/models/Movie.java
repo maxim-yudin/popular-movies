@@ -91,6 +91,9 @@ public class Movie implements Parcelable {
      */
     public interface Contract extends ProviGenBaseContract {
         @Column(Column.Type.TEXT)
+        String MOVIE_ID = "movie_id";
+        
+        @Column(Column.Type.TEXT)
         String ORIGINAL_TITLE = "original_title";
 
         @Column(Column.Type.TEXT)
