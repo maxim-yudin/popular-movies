@@ -2,9 +2,11 @@ package jqsoft.ru.nanodegree.popularmoviesapp.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
@@ -66,6 +68,9 @@ public class MovieDetailActivityFragment extends Fragment {
     private Movie movie;
     private ArrayList<Trailer> trailerList;
     private ArrayList<Review> reviewList;
+
+    private SharedPreferences settings;
+    private String currentSortBy;
 
     /**
      * A callback interface that allows main activity to be notified of movie
@@ -170,6 +175,11 @@ public class MovieDetailActivityFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        currentSortBy = settings.getString(getString(R.string.pref_sort_order_key),
+                getString(R.string.pref_sort_order_popularity_desc_value));
+
         movie = getMovie();
 
         Picasso.with(getActivity()).load(movie.getBackdropUrl()).centerCrop().fit().into(ivBackDrop, new Callback() {
@@ -223,20 +233,31 @@ public class MovieDetailActivityFragment extends Fragment {
 
         protected MoreInfoAboutMovieResult doInBackground(Void... params) {
             try {
-                MovieDbApi movieDbApi = new MovieDbApi();
-                MovieDbService movieDbService = movieDbApi.getService();
-                TrailerListResult trailerListResult = movieDbService.getTrailerList(movie.Id);
-                if (trailerListResult == null || trailerListResult.getTrailerList() == null) {
-                    return null;
-                }
-                ReviewListResult reviewListResult = movieDbService.getReviewList(movie.Id);
-                if (reviewListResult == null || reviewListResult.getReviewList() == null) {
-                    return null;
-                }
-
                 MoreInfoAboutMovieResult moreInfoAboutMovieResult = new MoreInfoAboutMovieResult();
-                moreInfoAboutMovieResult.trailerList = trailerListResult.getTrailerList();
-                moreInfoAboutMovieResult.reviewList = reviewListResult.getReviewList();
+                if (!currentSortBy.equals(getString(R.string.pref_sort_order_favorites_value))) {
+                    MovieDbApi movieDbApi = new MovieDbApi();
+                    MovieDbService movieDbService = movieDbApi.getService();
+                    TrailerListResult trailerListResult = movieDbService.getTrailerList(movie.Id);
+                    if (trailerListResult == null || trailerListResult.getTrailerList() == null) {
+                        return null;
+                    }
+                    ReviewListResult reviewListResult = movieDbService.getReviewList(movie.Id);
+                    if (reviewListResult == null || reviewListResult.getReviewList() == null) {
+                        return null;
+                    }
+
+                    moreInfoAboutMovieResult.trailerList = trailerListResult.getTrailerList();
+                    moreInfoAboutMovieResult.reviewList = reviewListResult.getReviewList();
+
+                    // if the movie is favorite, then update trailer and review lists in db for using in favorites mode
+                    if (FavoritesStorage.isFavorite(getActivity(), movie.Id)) {
+                        FavoritesStorage.saveTrailersOfFavoriteMovie(getActivity(), movie.Id, moreInfoAboutMovieResult.trailerList);
+                        FavoritesStorage.saveReviewsOfFavoriteMovie(getActivity(), movie.Id, moreInfoAboutMovieResult.reviewList);
+                    }
+                } else {
+                    moreInfoAboutMovieResult.trailerList = FavoritesStorage.getTrailerOfFavoriteMovie(getActivity(), movie.Id);
+                    moreInfoAboutMovieResult.reviewList = FavoritesStorage.getReviewOfFavoriteMovie(getActivity(), movie.Id);
+                }
                 return moreInfoAboutMovieResult;
             } catch (Exception e) {
                 // if some erros occurs, e.g. no internet

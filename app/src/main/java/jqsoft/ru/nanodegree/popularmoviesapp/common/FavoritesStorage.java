@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Movie;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.Review;
@@ -29,33 +30,21 @@ public class FavoritesStorage {
         movieValues.put(Movie.Contract.VOTE_AVERAGE, movie.VoteAverage);
         contentResolver.insert(Movie.Contract.CONTENT_URI, movieValues);
 
-        contentResolver.delete(Trailer.Contract.CONTENT_URI,
-                Trailer.Contract.MOVIE_ID + "= ?", new String[]{movie.Id});
+        saveTrailersOfFavoriteMovie(context, movie.Id, trailerList);
+        saveReviewsOfFavoriteMovie(context, movie.Id, reviewList);
+    }
 
-        if (trailerList != null && trailerList.size() != 0) {
-            ArrayList<ContentValues> trailerListValues = new ArrayList<>();
-            for (Trailer trailer : trailerList) {
-                ContentValues trailerValues = new ContentValues();
-                trailerValues.put(Trailer.Contract.MOVIE_ID, movie.Id);
-                trailerValues.put(Trailer.Contract.KEY, trailer.Key);
-                trailerValues.put(Trailer.Contract.NAME, trailer.Name);
-                trailerListValues.add(trailerValues);
-            }
-            if (trailerListValues.size() != 0) {
-                ContentValues[] trailerListArray = new ContentValues[trailerListValues.size()];
-                trailerListValues.toArray(trailerListArray);
-                contentResolver.bulkInsert(Trailer.Contract.CONTENT_URI, trailerListArray);
-            }
-        }
+    public static void saveReviewsOfFavoriteMovie(Context context, String movieId, List<Review> reviewList) {
+        final ContentResolver contentResolver = context.getContentResolver();
 
         contentResolver.delete(Review.Contract.CONTENT_URI,
-                Review.Contract.MOVIE_ID + "= ?", new String[]{movie.Id});
+                Review.Contract.MOVIE_ID + "= ?", new String[]{movieId});
 
         if (reviewList != null && reviewList.size() != 0) {
             ArrayList<ContentValues> reviewListValues = new ArrayList<>();
             for (Review review : reviewList) {
                 ContentValues reviewValues = new ContentValues();
-                reviewValues.put(Review.Contract.MOVIE_ID, movie.Id);
+                reviewValues.put(Review.Contract.MOVIE_ID, movieId);
                 reviewValues.put(Review.Contract.AUTHOR, review.Author);
                 reviewValues.put(Review.Contract.CONTENT, review.Content);
                 reviewListValues.add(reviewValues);
@@ -64,6 +53,29 @@ public class FavoritesStorage {
                 ContentValues[] reviewListArray = new ContentValues[reviewListValues.size()];
                 reviewListValues.toArray(reviewListArray);
                 contentResolver.bulkInsert(Review.Contract.CONTENT_URI, reviewListArray);
+            }
+        }
+    }
+
+    public static void saveTrailersOfFavoriteMovie(Context context, String movieId, List<Trailer> trailerList) {
+        final ContentResolver contentResolver = context.getContentResolver();
+
+        contentResolver.delete(Trailer.Contract.CONTENT_URI,
+                Trailer.Contract.MOVIE_ID + "= ?", new String[]{movieId});
+
+        if (trailerList != null && trailerList.size() != 0) {
+            ArrayList<ContentValues> trailerListValues = new ArrayList<>();
+            for (Trailer trailer : trailerList) {
+                ContentValues trailerValues = new ContentValues();
+                trailerValues.put(Trailer.Contract.MOVIE_ID, movieId);
+                trailerValues.put(Trailer.Contract.KEY, trailer.Key);
+                trailerValues.put(Trailer.Contract.NAME, trailer.Name);
+                trailerListValues.add(trailerValues);
+            }
+            if (trailerListValues.size() != 0) {
+                ContentValues[] trailerListArray = new ContentValues[trailerListValues.size()];
+                trailerListValues.toArray(trailerListArray);
+                contentResolver.bulkInsert(Trailer.Contract.CONTENT_URI, trailerListArray);
             }
         }
     }
@@ -94,6 +106,76 @@ public class FavoritesStorage {
             cursor.close();
             return true;
         }
+    }
+
+    private static final String[] TRAILER_PROJECTION = new String[]{
+            Trailer.Contract.KEY,
+            Trailer.Contract.NAME,
+    };
+
+    // these indices must match the projection TRAILER_PROJECTION that don't use getColumnIndex() method
+    private static final int INDEX_TRAILER_KEY = 0;
+    private static final int INDEX_TRAILER_NAME = 1;
+
+    public static ArrayList<Trailer> getTrailerOfFavoriteMovie(Context context, String movieId) {
+        final ContentResolver contentResolver = context.getContentResolver();
+
+        ArrayList<Trailer> trailerList = new ArrayList<>();
+
+        final Cursor cursor = contentResolver.query(Trailer.Contract.CONTENT_URI, TRAILER_PROJECTION, Trailer.Contract.MOVIE_ID + "= ?", new String[]{movieId}, "");
+
+        if (cursor == null) {
+            return trailerList;
+        } else if (cursor.getCount() < 1) {
+            cursor.close();
+            return trailerList;
+        }
+
+        Trailer trailer;
+        while (cursor.moveToNext()) {
+            trailer = new Trailer();
+            trailer.Key = cursor.getString(INDEX_TRAILER_KEY);
+            trailer.Name = cursor.getString(INDEX_TRAILER_NAME);
+            trailerList.add(trailer);
+        }
+        cursor.close();
+
+        return trailerList;
+    }
+
+    private static final String[] REVIEW_PROJECTION = new String[]{
+            Review.Contract.AUTHOR,
+            Review.Contract.CONTENT,
+    };
+
+    // these indices must match the projection REVIEW_PROJECTION that don't use getColumnIndex() method
+    private static final int INDEX_REVIEW_AUTHOR = 0;
+    private static final int INDEX_REVIEW_CONTENT = 1;
+
+    public static ArrayList<Review> getReviewOfFavoriteMovie(Context context, String movieId) {
+        final ContentResolver contentResolver = context.getContentResolver();
+
+        ArrayList<Review> reviewList = new ArrayList<>();
+
+        final Cursor cursor = contentResolver.query(Review.Contract.CONTENT_URI, REVIEW_PROJECTION, Review.Contract.MOVIE_ID + "= ?", new String[]{movieId}, "");
+
+        if (cursor == null) {
+            return reviewList;
+        } else if (cursor.getCount() < 1) {
+            cursor.close();
+            return reviewList;
+        }
+
+        Review review;
+        while (cursor.moveToNext()) {
+            review = new Review();
+            review.Author = cursor.getString(INDEX_REVIEW_AUTHOR);
+            review.Content = cursor.getString(INDEX_REVIEW_CONTENT);
+            reviewList.add(review);
+        }
+        cursor.close();
+
+        return reviewList;
     }
 
     private static final String[] MOVIE_PROJECTION = new String[]{
