@@ -1,8 +1,11 @@
 package jqsoft.ru.nanodegree.popularmoviesapp.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,7 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -42,6 +44,7 @@ import jqsoft.ru.nanodegree.popularmoviesapp.models.Trailer;
 import jqsoft.ru.nanodegree.popularmoviesapp.models.TrailerListResult;
 
 public class MovieDetailActivityFragment extends Fragment {
+    private static final String IS_FAVORITE = "isFavorite";
     private static final String TRAILER_LIST = "trailerList";
     private static final String REVIEW_LIST = "reviewList";
 
@@ -64,12 +67,12 @@ public class MovieDetailActivityFragment extends Fragment {
     private LinearLayout llReviewsContent;
     private LinearLayout llTrailersContent;
     private CheckableImageView civFavorited;
+    private TextView tvNoInternet;
 
     private Movie movie;
     private ArrayList<Trailer> trailerList;
     private ArrayList<Review> reviewList;
 
-    private SharedPreferences settings;
     private String currentSortBy;
 
     /**
@@ -136,6 +139,9 @@ public class MovieDetailActivityFragment extends Fragment {
         if (reviewList != null) {
             outState.putParcelableArrayList(REVIEW_LIST, reviewList);
         }
+
+        outState.putBoolean(IS_FAVORITE, civFavorited.isChecked());
+
         super.onSaveInstanceState(outState);
     }
 
@@ -144,6 +150,7 @@ public class MovieDetailActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
         pbLoading = (ProgressBar) fragmentView.findViewById(R.id.pbLoading);
+        tvNoInternet = (TextView) fragmentView.findViewById(R.id.tvNoInternet);
         svContent = (ScrollView) fragmentView.findViewById(R.id.svContent);
         ivBackDrop = (ImageView) fragmentView.findViewById(R.id.ivBackDrop);
         pbBackDropLoading = (ProgressBar) fragmentView.findViewById(R.id.pbBackDropLoading);
@@ -159,13 +166,7 @@ public class MovieDetailActivityFragment extends Fragment {
         civFavorited.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (FavoritesStorage.isFavorite(getActivity(), movie.Id)) {
-                    FavoritesStorage.removeFavorite(getActivity(), movie.Id);
-                } else {
-                    FavoritesStorage.addFavorite(getActivity(), movie, trailerList, reviewList);
-                }
-                civFavorited.toggle();
-                mCallbacks.onChangedFavoriteStatus();
+                new FavoriteActionAsyncTask(getActivity()).execute();
             }
         });
         return fragmentView;
@@ -175,7 +176,9 @@ public class MovieDetailActivityFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        tvNoInternet.setVisibility(View.GONE);
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         currentSortBy = settings.getString(getString(R.string.pref_sort_order_key),
                 getString(R.string.pref_sort_order_popularity_desc_value));
@@ -210,20 +213,27 @@ public class MovieDetailActivityFragment extends Fragment {
         tvReleaseDate.setText(getString(R.string.release_date, movie.ReleaseDate));
         tvRating.setText(getString(R.string.rating, movie.VoteAverage));
         tvOverview.setText(movie.Overview);
-        civFavorited.setChecked(FavoritesStorage.isFavorite(getActivity(), movie.Id));
 
         if (savedInstanceState == null || !savedInstanceState.containsKey(TRAILER_LIST)
-                || !savedInstanceState.containsKey(REVIEW_LIST)) {
-            new GetMoreInfoAboutMovieTask().execute();
+                || !savedInstanceState.containsKey(REVIEW_LIST) || !savedInstanceState.containsKey(IS_FAVORITE)) {
+            new GetMoreInfoAboutMovieTask(getActivity()).execute();
         } else {
             trailerList = savedInstanceState.getParcelableArrayList(TRAILER_LIST);
             reviewList = savedInstanceState.getParcelableArrayList(REVIEW_LIST);
+            civFavorited.setChecked(savedInstanceState.getBoolean(IS_FAVORITE));
 
             showReviewsAndTrailers();
         }
     }
 
     private class GetMoreInfoAboutMovieTask extends AsyncTask<Void, Void, MoreInfoAboutMovieResult> {
+        final Context mContext;
+        private boolean isFavoriteMovie;
+
+        public GetMoreInfoAboutMovieTask(Context context) {
+            mContext = context;
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -233,8 +243,16 @@ public class MovieDetailActivityFragment extends Fragment {
 
         protected MoreInfoAboutMovieResult doInBackground(Void... params) {
             try {
+                isFavoriteMovie = FavoritesStorage.isFavorite(mContext, movie.Id);
                 MoreInfoAboutMovieResult moreInfoAboutMovieResult = new MoreInfoAboutMovieResult();
                 if (!currentSortBy.equals(getString(R.string.pref_sort_order_favorites_value))) {
+                    // if now is no internet and the movie in favorites, then we load trailers and reviews from db
+                    if (isFavoriteMovie && !isInternetConnected()) {
+                        moreInfoAboutMovieResult.trailerList = FavoritesStorage.getTrailerOfFavoriteMovie(mContext, movie.Id);
+                        moreInfoAboutMovieResult.reviewList = FavoritesStorage.getReviewOfFavoriteMovie(mContext, movie.Id);
+                        return moreInfoAboutMovieResult;
+                    }
+
                     MovieDbApi movieDbApi = new MovieDbApi();
                     MovieDbService movieDbService = movieDbApi.getService();
                     TrailerListResult trailerListResult = movieDbService.getTrailerList(movie.Id);
@@ -250,13 +268,13 @@ public class MovieDetailActivityFragment extends Fragment {
                     moreInfoAboutMovieResult.reviewList = reviewListResult.getReviewList();
 
                     // if the movie is favorite, then update trailer and review lists in db for using in favorites mode
-                    if (FavoritesStorage.isFavorite(getActivity(), movie.Id)) {
-                        FavoritesStorage.saveTrailersOfFavoriteMovie(getActivity(), movie.Id, moreInfoAboutMovieResult.trailerList);
-                        FavoritesStorage.saveReviewsOfFavoriteMovie(getActivity(), movie.Id, moreInfoAboutMovieResult.reviewList);
+                    if (isFavoriteMovie) {
+                        FavoritesStorage.saveTrailersOfFavoriteMovie(mContext, movie.Id, moreInfoAboutMovieResult.trailerList);
+                        FavoritesStorage.saveReviewsOfFavoriteMovie(mContext, movie.Id, moreInfoAboutMovieResult.reviewList);
                     }
                 } else {
-                    moreInfoAboutMovieResult.trailerList = FavoritesStorage.getTrailerOfFavoriteMovie(getActivity(), movie.Id);
-                    moreInfoAboutMovieResult.reviewList = FavoritesStorage.getReviewOfFavoriteMovie(getActivity(), movie.Id);
+                    moreInfoAboutMovieResult.trailerList = FavoritesStorage.getTrailerOfFavoriteMovie(mContext, movie.Id);
+                    moreInfoAboutMovieResult.reviewList = FavoritesStorage.getReviewOfFavoriteMovie(mContext, movie.Id);
                 }
                 return moreInfoAboutMovieResult;
             } catch (Exception e) {
@@ -266,19 +284,21 @@ public class MovieDetailActivityFragment extends Fragment {
         }
 
         protected void onPostExecute(MoreInfoAboutMovieResult result) {
-            if (getActivity() == null) {
+            if (mContext == null) {
                 return;
             }
 
             if (result == null) {
-                Toast.makeText(getActivity(), R.string.some_error, Toast.LENGTH_SHORT).show();
                 pbLoading.setVisibility(View.GONE);
-                svContent.setVisibility(View.VISIBLE);
+                svContent.setVisibility(View.GONE);
+                tvNoInternet.setVisibility(View.VISIBLE);
                 return;
             }
 
             trailerList = new ArrayList<>(result.trailerList);
             reviewList = new ArrayList<>(result.reviewList);
+
+            civFavorited.setChecked(isFavoriteMovie);
 
             showReviewsAndTrailers();
         }
@@ -287,6 +307,35 @@ public class MovieDetailActivityFragment extends Fragment {
     private class MoreInfoAboutMovieResult {
         public List<Trailer> trailerList;
         public List<Review> reviewList;
+    }
+
+    private class FavoriteActionAsyncTask extends AsyncTask<Void, Void, Boolean> {
+        final Context mContext;
+
+        public FavoriteActionAsyncTask(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            if (FavoritesStorage.isFavorite(getActivity(), movie.Id)) {
+                FavoritesStorage.removeFavorite(getActivity(), movie.Id);
+            } else {
+                FavoritesStorage.addFavorite(getActivity(), movie, trailerList, reviewList);
+            }
+
+            return FavoritesStorage.isFavorite(getActivity(), movie.Id);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isFavoriteMovie) {
+            if (mContext == null) {
+                return;
+            }
+
+            civFavorited.setChecked(isFavoriteMovie);
+            mCallbacks.onChangedFavoriteStatus();
+        }
     }
 
     private void showReviewsAndTrailers() {
@@ -375,5 +424,13 @@ public class MovieDetailActivityFragment extends Fragment {
                 shareActionProvider.setShareIntent(shareIntent);
             }
         }
+    }
+
+    private boolean isInternetConnected() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }

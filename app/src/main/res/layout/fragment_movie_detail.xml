@@ -157,6 +157,14 @@
         </LinearLayout>
     </ScrollView>
 
+    <TextView
+        android:id="@+id/tvNoInternet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/some_error"
+        android:visibility="gone" />
+
     <ProgressBar
         android:id="@+id/pbLoading"
         android:layout_width="wrap_content"

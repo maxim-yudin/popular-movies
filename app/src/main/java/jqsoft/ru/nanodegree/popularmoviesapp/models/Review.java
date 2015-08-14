@@ -35,7 +35,7 @@ public class Review implements Parcelable {
     public Review() {
     }
 
-    protected Review(Parcel in) {
+    private Review(Parcel in) {
         this.Author = in.readString();
         this.Content = in.readString();
     }

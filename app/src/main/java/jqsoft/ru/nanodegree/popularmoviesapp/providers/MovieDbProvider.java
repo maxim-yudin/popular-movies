@@ -18,7 +18,7 @@ public class MovieDbProvider extends ProviGenProvider {
     private static final String DB_NAME = "MovieDb";
     private static final int DB_VERSION = 1;
 
-    public static final String AUTHORITY = "content://jqsoft.ru.nanodegree.popularmoviesapp";
+    private static final String AUTHORITY = "content://jqsoft.ru.nanodegree.popularmoviesapp";
 
     private static final Class[] contracts = new Class[]{
             Movie.Contract.class, Trailer.Contract.class, Review.Contract.class};

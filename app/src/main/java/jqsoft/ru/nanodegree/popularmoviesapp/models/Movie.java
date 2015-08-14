@@ -66,7 +66,7 @@ public class Movie implements Parcelable {
     public Movie() {
     }
 
-    protected Movie(Parcel in) {
+    private Movie(Parcel in) {
         this.Id = in.readString();
         this.OriginalTitle = in.readString();
         this.Overview = in.readString();

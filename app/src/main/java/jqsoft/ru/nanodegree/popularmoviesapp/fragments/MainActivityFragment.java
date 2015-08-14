@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,7 +20,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -227,6 +228,9 @@ public class MainActivityFragment extends Fragment {
         protected MovieListResult doInBackground(Void... params) {
             try {
                 if (!currentSortBy.equals(getString(R.string.pref_sort_order_favorites_value))) {
+                    if (!isInternetConnected()) {
+                        return null;
+                    }
                     MovieDbApi movieDbApi = new MovieDbApi();
                     MovieDbService movieDbService = movieDbApi.getService();
                     return movieDbService.getMovieList(currentSortBy);
@@ -247,9 +251,11 @@ public class MainActivityFragment extends Fragment {
             }
 
             if (result == null || result.getMovieList() == null) {
-                Toast.makeText(getActivity(), R.string.some_error, Toast.LENGTH_SHORT).show();
                 pbLoading.setVisibility(View.GONE);
-                gvMovieList.setVisibility(View.VISIBLE);
+                gvMovieList.setVisibility(View.GONE);
+                emptyView.setVisibility(View.VISIBLE);
+                emptyView.setText(R.string.some_error);
+                mCallbacks.onUpdateMovieDetailViewWhetherMovieListEmpty(true);
                 return;
             }
 
@@ -328,5 +334,13 @@ public class MainActivityFragment extends Fragment {
             ImageView ivPoster;
             ProgressBar pbPosterLoading;
         }
+    }
+
+    private boolean isInternetConnected() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }

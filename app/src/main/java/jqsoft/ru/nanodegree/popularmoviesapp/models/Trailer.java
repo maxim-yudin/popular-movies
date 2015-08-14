@@ -47,7 +47,7 @@ public class Trailer implements Parcelable {
     public Trailer() {
     }
 
-    protected Trailer(Parcel in) {
+    private Trailer(Parcel in) {
         this.Key = in.readString();
         this.Name = in.readString();
     }
